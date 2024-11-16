@@ -28,9 +28,9 @@ class Chart @JvmOverloads constructor(
 
     private val chartColumns = 7f
     private val chartRows = 5f
-    private val labelTextSize = 25f
+    private val labelTextSize = 30f
     private val marginTop = 80f
-    private val widthBackgroundLeft = 180f
+    private val widthBackgroundLeft = 210f
     private val maxValueY = 10f
 
     private var dataPoints = listOf<DataPoint>()
