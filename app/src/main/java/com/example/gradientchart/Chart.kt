@@ -17,16 +17,21 @@ class Chart @JvmOverloads constructor(
 
     private val paintGridLine = Paint(Paint.ANTI_ALIAS_FLAG)
     private val paintBottomLine = Paint(Paint.ANTI_ALIAS_FLAG)
+
     private val paintTextX = Paint(Paint.ANTI_ALIAS_FLAG)
     private val paintTextY = Paint(Paint.ANTI_ALIAS_FLAG)
+
     private val paintBackgroundLeft = Paint(Paint.ANTI_ALIAS_FLAG)
+
     private val paintLineChart = Paint(Paint.ANTI_ALIAS_FLAG)
     private val paintLineChartCircle = Paint(Paint.ANTI_ALIAS_FLAG)
 
+    private val chartColumns = 7f
+    private val chartRows = 5f
     private val labelTextSize = 25f
     private val marginTop = 80f
-    private val marginRight = 180f
-    private val maxY = 10f
+    private val widthBackgroundLeft = 180f
+    private val maxValueY = 10f
 
     private var dataPoints = listOf<DataPoint>()
 
@@ -80,7 +85,7 @@ class Chart @JvmOverloads constructor(
     }
 
     private fun drawBackground(canvas: Canvas) {
-        canvas.drawRect(0f, 0f, marginRight, height.toFloat(), paintBackgroundLeft)
+        canvas.drawRect(0f, 0f, widthBackgroundLeft, height.toFloat(), paintBackgroundLeft)
     }
 
     private fun drawBottomLine(canvas: Canvas) {
@@ -88,51 +93,51 @@ class Chart @JvmOverloads constructor(
     }
 
     private fun drawGridLine(canvas: Canvas) {
-        val columnWidth = (width - marginRight) / 7f
-        val rowHeight = (height - marginTop) / 5f
+        val columnWidth = (width - widthBackgroundLeft) / chartColumns
+        val rowHeight = (height - marginTop) / chartRows
         val marginVertical = columnWidth / 2
 
         for (i in 0..6) {
             val x = columnWidth * i
-            canvas.drawLine(x + marginVertical + marginRight, marginTop, x + marginVertical + marginRight, height.toFloat(), paintGridLine)
+            canvas.drawLine(x + marginVertical + widthBackgroundLeft, marginTop, x + marginVertical + widthBackgroundLeft, height.toFloat(), paintGridLine)
         }
 
         for (i in 0..4) {
             val y = (i * rowHeight) + marginTop
-            canvas.drawLine(marginRight, y, width.toFloat(), y, paintGridLine)
+            canvas.drawLine(widthBackgroundLeft, y, width.toFloat(), y, paintGridLine)
         }
     }
 
     private fun drawLabelX(canvas: Canvas) {
         val daysOfWeek = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
-        val columnWidth = (width - marginRight) / 7f
+        val columnWidth = (width - widthBackgroundLeft) / chartColumns
         val marginVertical = columnWidth / 2
         for (i in 0..6) {
             val label = daysOfWeek[i]
-            val xPosition = columnWidth * i + marginVertical - labelTextSize + marginRight
+            val xPosition = columnWidth * i + marginVertical - labelTextSize + widthBackgroundLeft
             canvas.drawText(label, xPosition, (marginTop + labelTextSize) / 2, paintTextX)
         }
     }
 
     private fun drawLabelY(canvas: Canvas) {
         val labels = listOf("Extreme", "Very High", "High", "Moderate", "Low")
-        val rowHeight = (height - marginTop) / 5f
+        val rowHeight = (height - marginTop) / chartRows
 
         for (i in 0..4) {
             val y = (i * rowHeight) + marginTop + (labelTextSize / 3)
-            canvas.drawText(labels[i], marginRight - 20f, y, paintTextY)
+            canvas.drawText(labels[i], widthBackgroundLeft - 20f, y, paintTextY)
         }
     }
 
     private fun drawDataChart(canvas: Canvas) {
         if (dataPoints.isEmpty()) return
 
-        val columnWidth = (width - marginRight) / 7f
+        val columnWidth = (width - widthBackgroundLeft) / chartColumns
         var point = PointF(0f, 0f)
 
         for (i in dataPoints.indices) {
-            val x = marginRight + (columnWidth * i) + (columnWidth / 2)
-            val y = height - ((dataPoints[i].yValue / maxY) * (height - marginTop))
+            val x = widthBackgroundLeft + (columnWidth * i) + (columnWidth / 2)
+            val y = height - ((dataPoints[i].yValue / maxValueY) * (height - marginTop))
 
             if (i > 0) {
                 val gradient = LinearGradient(point.x, point.y, x, y, getColor(dataPoints[i - 1].yValue),
