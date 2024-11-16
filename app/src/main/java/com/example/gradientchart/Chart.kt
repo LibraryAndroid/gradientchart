@@ -12,9 +12,7 @@ import android.util.AttributeSet
 import android.view.View
 
 class Chart @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
     private val paintGridLine = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -23,6 +21,7 @@ class Chart @JvmOverloads constructor(
     private val paintTextY = Paint(Paint.ANTI_ALIAS_FLAG)
     private val paintBackgroundLeft = Paint(Paint.ANTI_ALIAS_FLAG)
     private val paintLineChart = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val paintLineChartCircle = Paint(Paint.ANTI_ALIAS_FLAG)
 
     private val labelTextSize = 25f
     private val marginTop = 80f
@@ -40,7 +39,7 @@ class Chart @JvmOverloads constructor(
 
         paintBottomLine.apply {
             color = Color.parseColor("#939393")
-            strokeWidth = 2f
+            strokeWidth = 2.5f
         }
 
         paintTextX.apply {
@@ -60,6 +59,11 @@ class Chart @JvmOverloads constructor(
         }
 
         paintLineChart.apply {
+            color = Color.parseColor("#FE556F")
+            strokeWidth = 3f
+        }
+
+        paintLineChartCircle.apply {
             color = Color.parseColor("#FE556F")
             strokeWidth = 3f
         }
@@ -131,29 +135,53 @@ class Chart @JvmOverloads constructor(
             val y = height - ((dataPoints[i].yValue / maxY) * (height - marginTop))
 
             if (i > 0) {
-                val gradient = LinearGradient(
-                    point.x, point.y, x, y,
-                    getColor(dataPoints[i-1].yValue), getColor(dataPoints[i].yValue),
+                val gradient = LinearGradient(point.x, point.y, x, y, getColor(dataPoints[i - 1].yValue),
+                    getColor(dataPoints[i].yValue),
                     Shader.TileMode.CLAMP
                 )
                 paintLineChart.shader = gradient
+
+                val gradientTrans = LinearGradient(point.x, point.y, x, y,
+                    com.example.gradientchart.Color.generateTransparentColor(
+                        getColor(dataPoints[i - 1].yValue), 0.5
+                    ),
+                    com.example.gradientchart.Color.generateTransparentColor(
+                        getColor(dataPoints[i].yValue), 0.5
+                    ),
+                    Shader.TileMode.CLAMP
+                )
+                paintLineChartCircle.shader = gradientTrans
+                canvas.drawCircle(x, y, 16f, paintLineChartCircle)
+
                 canvas.drawLine(point.x, point.y, x, y, paintLineChart)
             } else {
-                val gradient = LinearGradient(
-                    point.x, point.y, x, y,
-                    getColor(dataPoints[i].yValue), getColor(dataPoints[i].yValue),
+                val gradient = LinearGradient(point.x, point.y, x, y,
+                    getColor(dataPoints[i].yValue),
+                    getColor(dataPoints[i].yValue),
                     Shader.TileMode.CLAMP
                 )
                 paintLineChart.shader = gradient
+
+                val gradientTrans = LinearGradient(point.x, point.y, x, y,
+                    com.example.gradientchart.Color.generateTransparentColor(
+                        getColor(dataPoints[i].yValue), 0.5
+                    ),
+                    com.example.gradientchart.Color.generateTransparentColor(
+                        getColor(dataPoints[i].yValue), 0.5
+                    ),
+                    Shader.TileMode.CLAMP
+                )
+                paintLineChartCircle.shader = gradientTrans
+                canvas.drawCircle(x, y, 16f, paintLineChartCircle)
             }
 
-            canvas.drawCircle(x, y, 10f, paintLineChart)
+            canvas.drawCircle(x, y, 12f, paintLineChart)
 
             point = PointF(x, y)
         }
     }
 
-    private fun getColor(yValue: Float) : Int {
+    private fun getColor(yValue: Float): Int {
         val colors = intArrayOf(
             Color.parseColor("#43E34F"),
             Color.parseColor("#F5DC4E"),
