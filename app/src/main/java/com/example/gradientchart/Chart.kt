@@ -50,6 +50,7 @@ class Chart @JvmOverloads constructor(
         paintTextX.apply {
             color = Color.parseColor("#ffffff")
             textSize = labelTextSize
+            textAlign = Paint.Align.CENTER
         }
 
         paintTextY.apply {
@@ -98,13 +99,17 @@ class Chart @JvmOverloads constructor(
         val marginVertical = columnWidth / 2
 
         for (i in 0..6) {
-            val x = columnWidth * i
-            canvas.drawLine(x + marginVertical + widthBackgroundLeft, marginTop, x + marginVertical + widthBackgroundLeft, height.toFloat(), paintGridLine)
+            val xPosition = columnWidth * i + marginVertical + widthBackgroundLeft
+            val startYPosition = marginTop
+            val endYPosition = height.toFloat()
+            canvas.drawLine(xPosition, startYPosition, xPosition, endYPosition, paintGridLine)
         }
 
         for (i in 0..4) {
-            val y = (i * rowHeight) + marginTop
-            canvas.drawLine(widthBackgroundLeft, y, width.toFloat(), y, paintGridLine)
+            val startXPosition = widthBackgroundLeft
+            val endXPosition = width.toFloat()
+            val yPosition = (i * rowHeight) + marginTop
+            canvas.drawLine(startXPosition, yPosition, endXPosition, yPosition, paintGridLine)
         }
     }
 
@@ -112,10 +117,12 @@ class Chart @JvmOverloads constructor(
         val daysOfWeek = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
         val columnWidth = (width - widthBackgroundLeft) / chartColumns
         val marginVertical = columnWidth / 2
+
         for (i in 0..6) {
             val label = daysOfWeek[i]
-            val xPosition = columnWidth * i + marginVertical - labelTextSize + widthBackgroundLeft
-            canvas.drawText(label, xPosition, (marginTop + labelTextSize) / 2, paintTextX)
+            val xPosition = columnWidth * i + marginVertical + widthBackgroundLeft
+            val yPosition = marginTop - labelTextSize
+            canvas.drawText(label, xPosition, yPosition, paintTextX)
         }
     }
 
@@ -124,8 +131,9 @@ class Chart @JvmOverloads constructor(
         val rowHeight = (height - marginTop) / chartRows
 
         for (i in 0..4) {
-            val y = (i * rowHeight) + marginTop + (labelTextSize / 3)
-            canvas.drawText(labels[i], widthBackgroundLeft - 20f, y, paintTextY)
+            val xPosition = widthBackgroundLeft - 20f
+            val yPosition = (i * rowHeight) + marginTop + labelTextSize / 3
+            canvas.drawText(labels[i], xPosition, yPosition, paintTextY)
         }
     }
 
