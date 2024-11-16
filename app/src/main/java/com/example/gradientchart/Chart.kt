@@ -141,10 +141,11 @@ class Chart @JvmOverloads constructor(
         if (dataPoints.isEmpty()) return
 
         val columnWidth = (width - widthBackgroundLeft) / chartColumns
+        val marginVertical = columnWidth / 2
         var point = PointF(0f, 0f)
 
         for (i in dataPoints.indices) {
-            val x = widthBackgroundLeft + (columnWidth * i) + (columnWidth / 2)
+            val x = widthBackgroundLeft + (columnWidth * i) + marginVertical
             val y = height - ((dataPoints[i].yValue / maxValueY) * (height - marginTop))
 
             if (i > 0) {
