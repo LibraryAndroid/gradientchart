@@ -13,14 +13,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val data = listOf(
-            DataPoint(0f, 6f),
-            DataPoint(1f, 6f),
-            DataPoint(2f, 2f),
-            DataPoint(3f, 2f),
-            DataPoint(4f, 2f),
-            DataPoint(5f, 2f),
-            DataPoint(6f, 8f),
+            ChartEntry(0f, 6f),
+            ChartEntry(1f, 6f),
+            ChartEntry(2f, 2f),
+            ChartEntry(3f, 2f),
+            ChartEntry(4f, 2f),
+            ChartEntry(5f, 2f),
+            ChartEntry(6f, 8f),
         )
-        binding.chart.submitDataPoints(data)
+        binding.chart.submitChartEntries(data)
     }
 }

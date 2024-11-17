@@ -12,28 +12,34 @@ import android.util.AttributeSet
 import android.view.View
 
 class Chart @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
-
     private val paintGridLine = Paint(Paint.ANTI_ALIAS_FLAG)
     private val paintBottomLine = Paint(Paint.ANTI_ALIAS_FLAG)
 
-    private val paintTextX = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val paintTextY = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val paintXText = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val paintYText = Paint(Paint.ANTI_ALIAS_FLAG)
 
     private val paintBackgroundLeft = Paint(Paint.ANTI_ALIAS_FLAG)
 
-    private val paintLineChart = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val paintLineChartCircle = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val paintChartLine = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val paintChartCircleTransparent = Paint(Paint.ANTI_ALIAS_FLAG)
 
     private val chartColumns = 7f
     private val chartRows = 5f
-    private val labelTextSize = 30f
+    private val xLabelTextSize = 30f
+    private val yLabelTextSize = 27f
     private val marginTop = 80f
     private val widthBackgroundLeft = 210f
-    private val maxValueY = 10f
+    private val maxYValue = 10f
+    private val circleRadius = 12f
+    private val circleTransparentRadius = 16f
 
-    private var dataPoints = listOf<DataPoint>()
+    private val xLabels = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+    private val yLabels = listOf("Extreme", "Very High", "High", "Moderate", "Low")
+    private var chartEntries = listOf<ChartEntry>()
 
     init {
         paintGridLine.apply {
@@ -47,15 +53,15 @@ class Chart @JvmOverloads constructor(
             strokeWidth = 2.5f
         }
 
-        paintTextX.apply {
+        paintXText.apply {
             color = Color.parseColor("#ffffff")
-            textSize = labelTextSize
+            textSize = xLabelTextSize
             textAlign = Paint.Align.CENTER
         }
 
-        paintTextY.apply {
+        paintYText.apply {
             color = Color.parseColor("#7E7E7E")
-            textSize = labelTextSize
+            textSize = yLabelTextSize
             textAlign = Paint.Align.RIGHT
         }
 
@@ -64,12 +70,12 @@ class Chart @JvmOverloads constructor(
             style = Paint.Style.FILL
         }
 
-        paintLineChart.apply {
+        paintChartLine.apply {
             color = Color.parseColor("#FE556F")
             strokeWidth = 3f
         }
 
-        paintLineChartCircle.apply {
+        paintChartCircleTransparent.apply {
             color = Color.parseColor("#FE556F")
             strokeWidth = 3f
         }
@@ -80,9 +86,9 @@ class Chart @JvmOverloads constructor(
         drawBackground(canvas)
         drawBottomLine(canvas)
         drawGridLine(canvas)
-        drawLabelX(canvas)
-        drawLabelY(canvas)
-        drawDataChart(canvas)
+        drawXLabels(canvas)
+        drawYLabels(canvas)
+        drawChartEntries(canvas)
     }
 
     private fun drawBackground(canvas: Canvas) {
@@ -113,83 +119,80 @@ class Chart @JvmOverloads constructor(
         }
     }
 
-    private fun drawLabelX(canvas: Canvas) {
-        val daysOfWeek = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+    private fun drawXLabels(canvas: Canvas) {
         val columnWidth = (width - widthBackgroundLeft) / chartColumns
         val marginVertical = columnWidth / 2
 
         for (i in 0..6) {
-            val label = daysOfWeek[i]
             val xPosition = columnWidth * i + marginVertical + widthBackgroundLeft
-            val yPosition = marginTop - labelTextSize
-            canvas.drawText(label, xPosition, yPosition, paintTextX)
+            val yPosition = marginTop - xLabelTextSize
+            canvas.drawText(xLabels[i], xPosition, yPosition, paintXText)
         }
     }
 
-    private fun drawLabelY(canvas: Canvas) {
-        val labels = listOf("Extreme", "Very High", "High", "Moderate", "Low")
+    private fun drawYLabels(canvas: Canvas) {
         val rowHeight = (height - marginTop) / chartRows
 
         for (i in 0..4) {
             val xPosition = widthBackgroundLeft - 20f
-            val yPosition = (i * rowHeight) + marginTop + labelTextSize / 3
-            canvas.drawText(labels[i], xPosition, yPosition, paintTextY)
+            val yPosition = (i * rowHeight) + marginTop + yLabelTextSize / 3
+            canvas.drawText(yLabels[i], xPosition, yPosition, paintYText)
         }
     }
 
-    private fun drawDataChart(canvas: Canvas) {
-        if (dataPoints.isEmpty()) return
+    private fun drawChartEntries(canvas: Canvas) {
+        if (chartEntries.isEmpty()) return
 
         val columnWidth = (width - widthBackgroundLeft) / chartColumns
         val marginVertical = columnWidth / 2
         var point = PointF(0f, 0f)
 
-        for (i in dataPoints.indices) {
+        for (i in chartEntries.indices) {
             val x = widthBackgroundLeft + (columnWidth * i) + marginVertical
-            val y = height - ((dataPoints[i].yValue / maxValueY) * (height - marginTop))
+            val y = height - ((chartEntries[i].yValue / maxYValue) * (height - marginTop))
 
             if (i > 0) {
-                val gradient = LinearGradient(point.x, point.y, x, y, getColor(dataPoints[i - 1].yValue),
-                    getColor(dataPoints[i].yValue),
+                val gradient = LinearGradient(point.x, point.y, x, y, getColor(chartEntries[i - 1].yValue),
+                    getColor(chartEntries[i].yValue),
                     Shader.TileMode.CLAMP
                 )
-                paintLineChart.shader = gradient
+                paintChartLine.shader = gradient
 
                 val gradientTrans = LinearGradient(point.x, point.y, x, y,
                     com.example.gradientchart.Color.generateTransparentColor(
-                        getColor(dataPoints[i - 1].yValue), 0.5
+                        getColor(chartEntries[i - 1].yValue), 0.5
                     ),
                     com.example.gradientchart.Color.generateTransparentColor(
-                        getColor(dataPoints[i].yValue), 0.5
+                        getColor(chartEntries[i].yValue), 0.5
                     ),
                     Shader.TileMode.CLAMP
                 )
-                paintLineChartCircle.shader = gradientTrans
-                canvas.drawCircle(x, y, 16f, paintLineChartCircle)
+                paintChartCircleTransparent.shader = gradientTrans
+                canvas.drawCircle(x, y, circleTransparentRadius, paintChartCircleTransparent)
 
-                canvas.drawLine(point.x, point.y, x, y, paintLineChart)
+                canvas.drawLine(point.x, point.y, x, y, paintChartLine)
             } else {
                 val gradient = LinearGradient(point.x, point.y, x, y,
-                    getColor(dataPoints[i].yValue),
-                    getColor(dataPoints[i].yValue),
+                    getColor(chartEntries[i].yValue),
+                    getColor(chartEntries[i].yValue),
                     Shader.TileMode.CLAMP
                 )
-                paintLineChart.shader = gradient
+                paintChartLine.shader = gradient
 
                 val gradientTrans = LinearGradient(point.x, point.y, x, y,
                     com.example.gradientchart.Color.generateTransparentColor(
-                        getColor(dataPoints[i].yValue), 0.5
+                        getColor(chartEntries[i].yValue), 0.5
                     ),
                     com.example.gradientchart.Color.generateTransparentColor(
-                        getColor(dataPoints[i].yValue), 0.5
+                        getColor(chartEntries[i].yValue), 0.5
                     ),
                     Shader.TileMode.CLAMP
                 )
-                paintLineChartCircle.shader = gradientTrans
-                canvas.drawCircle(x, y, 16f, paintLineChartCircle)
+                paintChartCircleTransparent.shader = gradientTrans
+                canvas.drawCircle(x, y, circleTransparentRadius, paintChartCircleTransparent)
             }
 
-            canvas.drawCircle(x, y, 12f, paintLineChart)
+            canvas.drawCircle(x, y, circleRadius, paintChartLine)
 
             point = PointF(x, y)
         }
@@ -220,8 +223,8 @@ class Chart @JvmOverloads constructor(
         setMeasuredDimension(width, height)
     }
 
-    fun submitDataPoints(dataPoints: List<DataPoint>) {
-        this.dataPoints = dataPoints
+    fun submitChartEntries(chartEntries: List<ChartEntry>) {
+        this.chartEntries = chartEntries
         invalidate()
     }
 }
